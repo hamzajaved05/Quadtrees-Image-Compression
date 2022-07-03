@@ -2,28 +2,25 @@ import numpy as np
 import cv2 as cv
 
 class Quadtree:
-    def __init__(self, data, parent = None, n_dim = 3, factor = 15):
-        self.parent = parent
-        self.n_dim = 3
-        self.factor = factor
+    def __init__(self, data, factor = 15):
         self.child = None
         self.val = None
-        self.compress(data)
+        self.compress(data, factor)
         
     def get_quadrants(self, data):
         shape = data.shape[:2]
         siz = shape[0] // 2
         return data[:siz, :siz], data[:siz, siz:], data[siz:, :siz], data[siz:, siz:]
 
-    def compress(self, data):
+    def compress(self, data, factor):
         shape = data.shape[:2]
         lin_data = data.reshape(-1, data.shape[-1])
         var = np.linalg.norm(lin_data.max(0) - lin_data.min(0))
-        if var >= self.factor:
+        if var >= factor:
             res = []
             Q = self.get_quadrants(data)
             for q in Q:
-                res.append(Quadtree(q, parent = self, n_dim = self.n_dim, factor = self.factor))
+                res.append(Quadtree(q, factor = factor))
             self.child = res
         else:
             avg = lin_data.mean(0).astype("uint8")
